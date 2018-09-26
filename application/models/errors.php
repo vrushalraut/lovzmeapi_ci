@@ -47,7 +47,6 @@ class Errors extends CI_Model
 							'message'=>"Invalid resource call!"
 						); 	
 		}
-
 		echo json_encode($data,true);
 	}
 }

@@ -93,9 +93,9 @@ class Api extends CI_Controller {
 
 	public function test()
 	{
-		echo "Hello Test";
-		$url = file_get_contents("http://localhost/php/ci/lovzmeapi/index.php/api/lovzmeprice/14");
+		$url = file_get_contents("http://localhost/php/ci/lovzmeapi/index.php/api/lovzmeprice/14??ws_key=7U7DZ8549RD546TJUMNSIAA2LAJ4DDRL");
 		$data = json_decode($url,true);
-		// print_r($data);
+		echo "Hello Test";
+		print_r($data);
 	}
 }

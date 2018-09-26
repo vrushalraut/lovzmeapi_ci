@@ -10,14 +10,20 @@ class Products extends CI_Model
 
 	public function getProducts($id_product=null)
 	{
+		// $data = array();
 		if(!empty($id_product))
 		{
 			$this->db->where('id_product',$id_product);
 			$query = $this->db->get(_DB_PREFIX_.'product');
-			echo json_encode($query->result());
+			$data = $query->result();
+			$data1['price_extra'] = $this->calProductPriceTax($id_product);
+			array_push($data, $data1);
+			// echo json_encode($query->result());
+			echo json_encode($data);
 		}
 		else
 		{
+			$this->db->select('id_product');
 			$query = $this->db->get(_DB_PREFIX_.'product');
 			echo json_encode($query->result());
 		}
