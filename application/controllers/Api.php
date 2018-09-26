@@ -23,6 +23,25 @@ class Api extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->model('products');
+		$this->load->model('errors');
+
+		$api_key = $this->input->get('ws_key');
+
+		if ( API_KEY != $api_key ) 
+		{
+			if ( empty($api_key) ) 
+			{
+				$this->error('api_mis');
+				exit;
+			}
+			else
+			{
+				$this->error('api');
+				exit;	
+			}
+			
+		}
+		
 	}
 
 	public function index()
@@ -56,6 +75,12 @@ class Api extends CI_Controller {
 		{
 			$this->products->getLovzmeProductsPrice();
 		}
+	}
+
+	public function error($error_name)
+	{
+		$errors = $this->errors->error_name($error_name);
+		return $errors;
 	}
 
 	public function getmethod()
