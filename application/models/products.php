@@ -103,7 +103,6 @@ class Products extends CI_Model
 				}
 
 				//echo json_encode($data);
-				// print_r($data);
 				return $data;
 
 			}
