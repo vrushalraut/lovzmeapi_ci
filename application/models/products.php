@@ -16,7 +16,7 @@ class Products extends CI_Model
 			$this->db->where('id_product',$id_product);
 			$query = $this->db->get(_DB_PREFIX_.'product');
 			$data = $query->result();
-			$data1['price_extra'] = $this->calProductPriceTax($id_product);
+			$data1['product_info'] = $this->calProductPriceTax($id_product);
 			array_push($data, $data1);
 			// echo json_encode($query->result());
 			echo json_encode($data);
@@ -56,7 +56,7 @@ class Products extends CI_Model
 			if(!empty($id_product))
 			{
 				// Getting TAX RULE GROUP
-				$this->db->select('id_tax_rules_group,price');
+				$this->db->select('*');
 				$this->db->where('id_product',$id_product);
 				$products = $this->db->get(_DB_PREFIX_.'product')
 									->row();
@@ -77,9 +77,115 @@ class Products extends CI_Model
 				$tax_rate = $this->db->get(_DB_PREFIX_.'tax')
 										->row()
 										->rate;
+
+				// Category name
+				$sql = "	SELECT
+								    DISTINCT `name`
+								FROM
+								    `"._DB_PREFIX_."category_lang`
+								INNER JOIN `"._DB_PREFIX_."category_group` INNER JOIN `"._DB_PREFIX_."category` ON `"._DB_PREFIX_."category`.`id_category` = `"._DB_PREFIX_."category_group`.`id_category`
+							WHERE `"._DB_PREFIX_."category_lang`.`id_category` =". $products->id_category_default ."";
 				
-				
+				$category_name = $this->db->query($sql)->row()->name;
+
+				// Product name
+				$sql = "SELECT DISTINCT `name` FROM `"._DB_PREFIX_."product_lang` WHERE `id_product` =".$id_product."";
+				$product_name = $this->db->query($sql)->row()->name;
+
+				$sql = " SELECT
+							    m.name AS manufacturer,
+							    p.id_product,
+							    pl.name,
+							    GROUP_CONCAT(DISTINCT(al.name) SEPARATOR ',') AS combinations,
+							    s.quantity
+							FROM
+							    ps_product p
+							LEFT JOIN ps_product_lang pl ON
+							    (
+							    	p.id_product = pl.id_product
+							    )
+							LEFT JOIN ps_manufacturer m ON
+							    (
+							        p.id_manufacturer = m.id_manufacturer
+							    )
+							LEFT JOIN ps_category_product cp ON
+							    (
+							    	p.id_product = cp.id_product
+							    )
+							LEFT JOIN ps_category_lang cl ON
+							    (
+							        cp.id_category = cl.id_category
+							    )
+							LEFT JOIN ps_category c ON
+							    (
+							    	cp.id_category = c.id_category
+							    )
+							LEFT JOIN ps_stock_available s ON
+							    (
+							    	p.id_product = s.id_product
+							    )
+							LEFT JOIN ps_product_tag pt ON
+							    (
+							    	p.id_product = pt.id_product
+							    )
+							LEFT JOIN ps_product_attribute pa ON
+							    (
+							    	p.id_product = pa.id_product
+							    )
+							LEFT JOIN ps_product_attribute_combination pac ON
+							    (
+							        pac.id_product_attribute = pa.id_product_attribute
+							    )
+							LEFT JOIN ps_attribute_lang al ON
+							    (
+							        al.id_attribute = pac.id_attribute
+							    )
+						WHERE
+						    pl.id_lang = 1 
+						    AND cl.id_lang = 1 
+						    AND p.id_shop_default = 1 
+						    AND c.id_shop_default = 1 
+						    AND	p.id_product = '$id_product'
+						GROUP BY
+                           	pac.id_product_attribute
+                        ORDER BY 
+                        	al.name ASC";
+
+				$combination = $this->db->query($sql)->result();
+
+				// Combination Logic
+				$i = 0;
+				foreach ($combination as $key => $value) 
+				{
+						$data['combinations'][$i]['id_product'] = $value->id_product;
+						$combinations = explode(',',$value->combinations);		
+
+							if(is_numeric($combination[0]) || )
+							{
+								$data['combinations'][$i]['combination']['size'] = $combinations[0];
+							}
+							else
+							{
+								$data['combinations'][$i]['combination']['size'] = $combinations[0];	
+							}
+
+							if(is_numeric($combinations[1]))
+							{
+								$data['combinations'][$i]['combination']['color'] = $combinations[0];
+							}
+							else
+							{
+								$data['combinations'][$i]['combination']['color'] = $combinations[1];
+							}
+							
+						$data['combinations'][$i]['quantity'] = $value->quantity;			
+						$i++;
+				}
+
 				$data['id_product']	= $id_product;
+				$data['product_name'] = $product_name;
+				$data['category_name'] = $category_name;
+				$data['reference']	= $products->reference;
 				$data['price'] = $price;
 				$data['price_tax_excl'] = $price;
 				$data['price_tax_incl'] = $price + ((($tax_rate + $tax_rate)/100) * $price);
@@ -101,10 +207,7 @@ class Products extends CI_Model
 				{
 					$data['reduction_rate'] = 0;
 				}
-
-				//echo json_encode($data);
 				return $data;
-
 			}
 			else
 			{
