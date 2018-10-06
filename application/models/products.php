@@ -35,6 +35,7 @@ class Products extends CI_Model
 		{
 			// $aa = array('1','2','3');
 			echo json_encode($this->calProductPriceTax($id_product));
+			unset($data);
 		}
 		else
 		{
@@ -48,6 +49,7 @@ class Products extends CI_Model
 				$json[] = $this->calProductPriceTax($row->id_product);
 			}
 			echo json_encode($json);
+			unset($data);
 		}
 	}
 
@@ -155,27 +157,41 @@ class Products extends CI_Model
 
 				// Combination Logic
 				$i = 0;
+				$combinations = "";
+				$data['combinations'][$i]['combination']['size'] = "";
+				$data['combinations'][$i]['combination']['color'] = "";
+
 				foreach ($combination as $key => $value) 
 				{
 						$data['combinations'][$i]['id_product'] = $value->id_product;
+						
 						$combinations = explode(',',$value->combinations);		
-
-							if(is_numeric($combination[0]) || )
+						
+							// Product Size logic
+							if( is_numeric($combinations[0]) == TRUE || preg_match("/[Xx|Ss|Ll|Mm]+/",$combinations[0]) == TRUE || preg_match("/^[2-5](2|4|6|8|0)(A(A)?|B|C|D(D(D)?)?|E|F|G|H)$/",$combinations[0]) == TRUE || is_numeric($combination[0]) == TRUE )
 							{
-								$data['combinations'][$i]['combination']['size'] = $combinations[0];
+								$data['combinations'][$i]['combination']['size'] = $combinations[0];		
 							}
 							else
 							{
-								$data['combinations'][$i]['combination']['size'] = $combinations[0];	
+								$data['combinations'][$i]['combination']['size'] = $combinations[1];						
 							}
 
+							// Product Color logic
 							if(is_numeric($combinations[1]))
 							{
-								$data['combinations'][$i]['combination']['color'] = $combinations[0];
-							}
+								$data['combinations'][$i]['combination']['color'] = $combinations[0];					
+							}				
 							else
 							{
-								$data['combinations'][$i]['combination']['color'] = $combinations[1];
+								if($combinations[1] == null)
+								{
+									$data['combinations'][$i]['combination']['color'] = "Multicolor";
+								}
+								else
+								{						
+									$data['combinations'][$i]['combination']['color'] = $combinations[1];							
+								}
 							}
 							
 						$data['combinations'][$i]['quantity'] = $value->quantity;			
