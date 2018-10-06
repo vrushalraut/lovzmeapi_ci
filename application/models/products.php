@@ -155,42 +155,55 @@ class Products extends CI_Model
 
 				$combination = $this->db->query($sql)->result();
 
+				$data['id_product']	= $id_product;
 				// Combination Logic
 				$i = 0;
 				$combinations = "";
 				$data['combinations'][$i]['combination']['size'] = "";
 				$data['combinations'][$i]['combination']['color'] = "";
+				$color = array();
 
 				foreach ($combination as $key => $value) 
 				{
 						$data['combinations'][$i]['id_product'] = $value->id_product;
 						
 						$combinations = explode(',',$value->combinations);		
-						
+
 							// Product Size logic
-							if( is_numeric($combinations[0]) == TRUE || preg_match("/[Xx|Ss|Ll|Mm]+/",$combinations[0]) == TRUE || preg_match("/^[2-5](2|4|6|8|0)(A(A)?|B|C|D(D(D)?)?|E|F|G|H)$/",$combinations[0]) == TRUE || is_numeric($combination[0]) == TRUE )
+							if( is_numeric($combinations[0]) == TRUE || preg_match("/[Xx|Ss|Ll|Mm]+/",$combinations[0]) == TRUE || preg_match("/^[2-5](2|4|6|8|0)(A(A)?|B|C|D(D(D)?)?|E|F|G|H)$/",$combinations[0]) == TRUE || is_numeric($combinations[0]) == TRUE )
 							{
 								$data['combinations'][$i]['combination']['size'] = $combinations[0];		
 							}
 							else
 							{
-								$data['combinations'][$i]['combination']['size'] = $combinations[1];						
+								$data['combinations'][$i]['combination']['size'] = $combinations[1];
+								unset($combinations[1]);						
 							}
 
 							// Product Color logic
-							if(is_numeric($combinations[1]))
+							if( is_numeric($combinations[1]) == TRUE || preg_match("/[Xx|Ss|Ll|Mm]+/",$combinations[1]) == TRUE || preg_match("/^[2-5](2|4|6|8|0)(A(A)?|B|C|D(D(D)?)?|E|F|G|H)$/",$combinations[1]) == TRUE || is_numeric($combinations[1]) == TRUE)
 							{
-								$data['combinations'][$i]['combination']['color'] = $combinations[0];					
+								$data['combinations'][$i]['combination']['color'] = $combinations[0];
+								$color = $combinations[0];					
 							}				
 							else
 							{
 								if($combinations[1] == null)
 								{
-									$data['combinations'][$i]['combination']['color'] = "Multicolor";
+									if(empty($combinations[1]))
+									{
+										$data['combinations'][$i]['combination']['color'] = "Multicolor";
+									}
+									else
+									{
+										$data['combinations'][$i]['combination']['color'] = $color;
+									}
 								}
 								else
 								{						
-									$data['combinations'][$i]['combination']['color'] = $combinations[1];							
+									$data['combinations'][$i]['combination']['color'] = $combinations[1];
+									// $color = $combinations[1];	
+									unset($combinations[1]);						
 								}
 							}
 							
@@ -198,7 +211,7 @@ class Products extends CI_Model
 						$i++;
 				}
 
-				$data['id_product']	= $id_product;
+				
 				$data['product_name'] = $product_name;
 				$data['category_name'] = $category_name;
 				$data['reference']	= $products->reference;
