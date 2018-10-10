@@ -151,7 +151,7 @@ class Products extends CI_Model
 						GROUP BY
                            	pac.id_product_attribute
                         ORDER BY 
-                        	al.name ASC";
+                        	combinations ASC";
 
 				$combination = $this->db->query($sql)->result();
 
@@ -159,54 +159,77 @@ class Products extends CI_Model
 				// Combination Logic
 				$i = 0;
 				$combinations = "";
-				$data['combinations'][$i]['combination']['size'] = "";
-				$data['combinations'][$i]['combination']['color'] = "";
-				$color = array();
-
+				// $data['combinations'][$i]['combination']['size'] = "";
+				// $data['combinations'][$i]['combination']['color'] = "";
+			
 				foreach ($combination as $key => $value) 
 				{
 						$data['combinations'][$i]['id_product'] = $value->id_product;
 						
 						$combinations = explode(',',$value->combinations);		
+						// Product Size logic
+						
+							if( is_numeric($combinations[0]) == TRUE || preg_match("/[X|S|L|M|XL|XXL|XXXL]+/",$combinations[0]) == TRUE || preg_match("/^[2-5](2|4|6|8|0)(A(A)?|B|C|D(D(D)?)?|E|F|G|H)$/",$combinations[0]) == TRUE || is_numeric($combinations[0]) == TRUE)
+								{
+									$data['combinations'][$i]['combination']['size'] = $combinations[0];
+									if($combinations[0] === "Multicolor")
+									{
+										$data['combinations'][$i]['combination']['color'] = $combinations[0];
+									}
 
-							// Product Size logic
-							if( is_numeric($combinations[0]) == TRUE || preg_match("/[Xx|Ss|Ll|Mm]+/",$combinations[0]) == TRUE || preg_match("/^[2-5](2|4|6|8|0)(A(A)?|B|C|D(D(D)?)?|E|F|G|H)$/",$combinations[0]) == TRUE || is_numeric($combinations[0]) == TRUE )
-							{
-								$data['combinations'][$i]['combination']['size'] = $combinations[0];		
-							}
+								}
+							// else
+							// {
+							// 	$data['combinations'][$i]['combination']['size'] = $combinations[1];
+							// 	$data['combinations'][$i]['combination']['color'] = $combinations[0];
+							// }
 							else
 							{
-								$data['combinations'][$i]['combination']['size'] = $combinations[1];
-								unset($combinations[1]);						
+								if( is_numeric($combinations[1]) == TRUE || preg_match("/[X|S|L|M|XL|XXL|XXXL]+/",$combinations[1]) == TRUE || preg_match("/^[2-5](2|4|6|8|0)(A(A)?|B|C|D(D(D)?)?|E|F|G|H)$/",$combinations[1]) == TRUE || is_numeric($combinations[1]) == TRUE && $combinations[1] != "Multicolor")
+									{
+										$data['combinations'][$i]['combination']['size'] = $combinations[1];
+										$data['combinations'][$i]['combination']['color'] = $combinations[0];
+										// $color = $combinations[0];
+										// unset($combinations[1]);						
+									}
 							}
 
 							// Product Color logic
-							if( is_numeric($combinations[1]) == TRUE || preg_match("/[Xx|Ss|Ll|Mm]+/",$combinations[1]) == TRUE || preg_match("/^[2-5](2|4|6|8|0)(A(A)?|B|C|D(D(D)?)?|E|F|G|H)$/",$combinations[1]) == TRUE || is_numeric($combinations[1]) == TRUE)
+							if( is_numeric($combinations[1]) == TRUE || preg_match("/[X|S|L|M|XL|XXL|XXXL]+/",$combinations[1]) == TRUE || preg_match("/^[2-5](2|4|6|8|0)(A(A)?|B|C|D(D(D)?)?|E|F|G|H)$/",$combinations[1]) == TRUE || is_numeric($combinations[1]) == TRUE)
 							{
 								$data['combinations'][$i]['combination']['color'] = $combinations[0];
-								$color = $combinations[0];					
+								$color = $combinations[0];
+
 							}				
 							else
 							{
 								if($combinations[1] == null)
 								{
-									if(empty($combinations[1]))
+									if(empty($combinations[1]) && $color == "Multicolor" )
 									{
 										$data['combinations'][$i]['combination']['color'] = "Multicolor";
 									}
 									else
 									{
-										$data['combinations'][$i]['combination']['color'] = $color;
+										if ($color == null) 
+										{
+											$data['combinations'][$i]['combination']['color'] = "Multicolor";
+										}
+										else
+										{
+											$data['combinations'][$i]['combination']['color'] = $color;
+										}
 									}
 								}
+
 								else
 								{						
 									$data['combinations'][$i]['combination']['color'] = $combinations[1];
-									// $color = $combinations[1];	
+									$color = $combinations[1];	
 									unset($combinations[1]);						
 								}
 							}
-							
+						
 						$data['combinations'][$i]['quantity'] = $value->quantity;			
 						$i++;
 				}
