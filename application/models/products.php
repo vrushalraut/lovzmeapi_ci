@@ -98,8 +98,9 @@ class Products extends CI_Model
 							    m.name AS manufacturer,
 							    p.id_product,
 							    pl.name,
-							    GROUP_CONCAT(DISTINCT(al.name) SEPARATOR ',') AS combinations,
-							    s.quantity
+							    GROUP_CONCAT(DISTINCT(al.name) ORDER BY al.name DESC SEPARATOR ',') AS combinations,
+							    s.quantity,
+							    LENGTH( GROUP_CONCAT(DISTINCT(al.name) ORDER BY al.name DESC SEPARATOR ',')) as comb_length
 							FROM
 							    ps_product p
 							LEFT JOIN ps_product_lang pl ON
@@ -151,32 +152,32 @@ class Products extends CI_Model
 						GROUP BY
                            	pac.id_product_attribute
                         ORDER BY 
-                        	combinations ASC";
+                        	comb_length DESC";
 
 				$combination = $this->db->query($sql)->result();
 
 				$data['id_product']	= $id_product;
+
 				// Combination Logic
 				$i = 0;
 				$combinations = "";
-				// $data['combinations'][$i]['combination']['size'] = "";
-				// $data['combinations'][$i]['combination']['color'] = "";
-			
+				$comcolor = "";
+
 				foreach ($combination as $key => $value) 
 				{
 						$data['combinations'][$i]['id_product'] = $value->id_product;
 						
 						$combinations = explode(',',$value->combinations);		
-						// Product Size logic
-						
+						/*
+						// Product Size logic						
 							if( is_numeric($combinations[0]) == TRUE || preg_match("/[X|S|L|M|XL|XXL|XXXL]+/",$combinations[0]) == TRUE || preg_match("/^[2-5](2|4|6|8|0)(A(A)?|B|C|D(D(D)?)?|E|F|G|H)$/",$combinations[0]) == TRUE || is_numeric($combinations[0]) == TRUE)
 								{
 									$data['combinations'][$i]['combination']['size'] = $combinations[0];
+
 									if($combinations[0] === "Multicolor")
 									{
 										$data['combinations'][$i]['combination']['color'] = $combinations[0];
 									}
-
 								}
 							// else
 							// {
@@ -229,12 +230,50 @@ class Products extends CI_Model
 									unset($combinations[1]);						
 								}
 							}
-						
+						*/
+
+						//Size Logic PROTOYPE
+						if( is_numeric($combinations[0]) || 
+							preg_match("/[X|S|L|M|XL|XXL|XXXL]+/",$combinations[0]) || 
+							preg_match("/^[2-5](2|4|6|8|0)(A(A)?|B|C|D(D(D)?)?|E|F|G|H)$/",$combinations[0]) || 
+							is_numeric($combinations[0]) == TRUE )
+							{
+								$data['combinations'][$i]['combination']['size'] = $combinations[0];
+								$data['combinations'][$i]['combination']['color'] = $combinations[1];
+								
+
+									if( $combinations[1] != null )
+									{
+										$color = $combinations[1];	
+									}
+
+									if( $combinations[1] == null )
+									{
+										$data['combinations'][$i]['combination']['color'] = $color;
+									}
+							}
+							else
+							{
+								$data['combinations'][$i]['combination']['size'] = $combinations[1];
+								$data['combinations'][$i]['combination']['color'] = $combinations[0];
+								
+
+									if( $combinations[0] != null )
+									{
+										$color = $combinations[0];	
+									}
+
+									if( $combinations[0] == null )
+									{
+										$data['combinations'][$i]['combination']['color'] = $color;
+									}
+
+							}
+
 						$data['combinations'][$i]['quantity'] = $value->quantity;			
 						$i++;
 				}
 
-				
 				$data['product_name'] = $product_name;
 				$data['category_name'] = $category_name;
 				$data['reference']	= $products->reference;
@@ -248,12 +287,22 @@ class Products extends CI_Model
 				$this->db->where('id_product',$id_product);
 				$reduction_rate = $this->db->get(_DB_PREFIX_.'specific_price')
 												->row();
-
-				$reduction_rate = floatval($reduction_rate->reduction);
-				if (isset($reduction_rate) && $reduction_rate != 0) 
+				
+				if( $reduction_rate == null )
 				{
-					$data['price_reduction'] = $data['price_tax_incl'] - (($reduction_rate) * $data['price_tax_incl']);
-					$data['reduction_rate'] = $reduction_rate * 100;
+					$reduction_rate = 0;
+					$reduction_rate1 = $reduction_rate;
+				}
+				else
+				{
+					$reduction_rate_db = $reduction_rate->reduction;
+					$reduction_rate1 = floatval($reduction_rate_db);
+				}
+
+				if (isset($reduction_rate1) && $reduction_rate1 != 0) 
+				{
+					$data['price_reduction'] = $data['price_tax_incl'] - (($reduction_rate1) * $data['price_tax_incl']);
+					$data['reduction_rate'] = $reduction_rate1 * 100;
 				}
 				else
 				{
