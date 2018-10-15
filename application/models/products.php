@@ -239,18 +239,19 @@ class Products extends CI_Model
 							is_numeric($combinations[0]) == TRUE )
 							{
 								$data['combinations'][$i]['combination']['size'] = $combinations[0];
-								$data['combinations'][$i]['combination']['color'] = $combinations[1];
 								
-
-									if( $combinations[1] != null )
+								$data['combinations'][$i]['combination']['color'] = isset($combinations[1]) ? $combinations[1] : null ;	
+								
+									if( isset($combinations[1]) && $combinations[1] != null )
 									{
 										$color = $combinations[1];	
 									}
 
-									if( $combinations[1] == null )
+									if( isset($combinations[1]) && $combinations[1] == null )
 									{
 										$data['combinations'][$i]['combination']['color'] = $color;
 									}
+								
 							}
 							else
 							{
