@@ -234,43 +234,41 @@ class Products extends CI_Model
 
 						//Size Logic PROTOYPE
 						if( is_numeric($combinations[0]) || 
-							preg_match("/[X|S|L|M|XL|XXL|XXXL]+/",$combinations[0]) || 
-							preg_match("/^[2-5](2|4|6|8|0)(A(A)?|B|C|D(D(D)?)?|E|F|G|H)$/",$combinations[0]) || 
+							preg_match("/[XS|X|S|L|M|XL|XXL|XXXL]+/",$combinations[0]) || 
+							preg_match("/^[2-5](2|4|6|8|0)(A(A)?|B|C|D(D(D)?)?|E|F|G|H|a|)$/",$combinations[0]) || 
 							is_numeric($combinations[0]) == TRUE )
 							{
+								// Default size from array
 								$data['combinations'][$i]['combination']['size'] = $combinations[0];
-								
-								$data['combinations'][$i]['combination']['color'] = isset($combinations[1]) ? $combinations[1] : null ;	
-								
-									if( isset($combinations[1]) && $combinations[1] != null )
+								// Default color from array
+								$data['combinations'][$i]['combination']['color'] = ( isset($combinations[1]) ? $combinations[1] : null );	
+									
+									// Put default color
+									if( isset($combinations[1]) && $combinations[1] != null && !empty($combinations[1]) )
 									{
 										$color = $combinations[1];	
 									}
-
-									if( isset($combinations[1]) && $combinations[1] == null )
+									else
+										// If only single field is filled with color and others are filled with 
 									{
 										$data['combinations'][$i]['combination']['color'] = $color;
 									}
-								
 							}
 							else
 							{
 								$data['combinations'][$i]['combination']['size'] = $combinations[1];
 								$data['combinations'][$i]['combination']['color'] = $combinations[0];
 								
-
-									if( $combinations[0] != null )
+									if( isset($combinations[0]) && $combinations[0] != null )
 									{
 										$color = $combinations[0];	
 									}
 
-									if( $combinations[0] == null )
+									if( isset($combinations[0]) && $combinations[0] == null )
 									{
 										$data['combinations'][$i]['combination']['color'] = $color;
 									}
-
 							}
-
 						$data['combinations'][$i]['quantity'] = $value->quantity;			
 						$i++;
 				}
