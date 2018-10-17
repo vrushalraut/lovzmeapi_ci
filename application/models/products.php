@@ -251,7 +251,14 @@ class Products extends CI_Model
 									else
 										// If only single field is filled with color and others are filled with 
 									{
-										$data['combinations'][$i]['combination']['color'] = $color;
+										if(isset($color))
+										{
+											$data['combinations'][$i]['combination']['color'] = $color;	
+										}
+										else
+										{
+											$data['combinations'][$i]['combination']['color'] = "Multicolor";
+										}	
 									}
 							}
 							else
