@@ -15,9 +15,10 @@ class Products extends CI_Model
 		{
 			$this->db->where('id_product',$id_product);
 			$query = $this->db->get(_DB_PREFIX_.'product');
-			$data = $query->result();
-			$data1['product_info'] = $this->calProductPriceTax($id_product);
-			array_push($data, $data1);
+			$data = $query->result_array();
+			$data[0]['product_info'] = $this->calProductPriceTax($id_product);
+			// array_push($data, $data1);
+			// array_merge($data,$data1);
 			// echo json_encode($query->result());
 			echo json_encode($data);
 		}
@@ -168,70 +169,7 @@ class Products extends CI_Model
 						$data['combinations'][$i]['id_product'] = $value->id_product;
 						
 						$combinations = explode(',',$value->combinations);		
-						/*
-						// Product Size logic						
-							if( is_numeric($combinations[0]) == TRUE || preg_match("/[X|S|L|M|XL|XXL|XXXL]+/",$combinations[0]) == TRUE || preg_match("/^[2-5](2|4|6|8|0)(A(A)?|B|C|D(D(D)?)?|E|F|G|H)$/",$combinations[0]) == TRUE || is_numeric($combinations[0]) == TRUE)
-								{
-									$data['combinations'][$i]['combination']['size'] = $combinations[0];
-
-									if($combinations[0] === "Multicolor")
-									{
-										$data['combinations'][$i]['combination']['color'] = $combinations[0];
-									}
-								}
-							// else
-							// {
-							// 	$data['combinations'][$i]['combination']['size'] = $combinations[1];
-							// 	$data['combinations'][$i]['combination']['color'] = $combinations[0];
-							// }
-							else
-							{
-								if( is_numeric($combinations[1]) == TRUE || preg_match("/[X|S|L|M|XL|XXL|XXXL]+/",$combinations[1]) == TRUE || preg_match("/^[2-5](2|4|6|8|0)(A(A)?|B|C|D(D(D)?)?|E|F|G|H)$/",$combinations[1]) == TRUE || is_numeric($combinations[1]) == TRUE && $combinations[1] != "Multicolor")
-									{
-										$data['combinations'][$i]['combination']['size'] = $combinations[1];
-										$data['combinations'][$i]['combination']['color'] = $combinations[0];
-										// $color = $combinations[0];
-										// unset($combinations[1]);						
-									}
-							}
-
-							// Product Color logic
-							if( is_numeric($combinations[1]) == TRUE || preg_match("/[X|S|L|M|XL|XXL|XXXL]+/",$combinations[1]) == TRUE || preg_match("/^[2-5](2|4|6|8|0)(A(A)?|B|C|D(D(D)?)?|E|F|G|H)$/",$combinations[1]) == TRUE || is_numeric($combinations[1]) == TRUE)
-							{
-								$data['combinations'][$i]['combination']['color'] = $combinations[0];
-								$color = $combinations[0];
-
-							}				
-							else
-							{
-								if($combinations[1] == null)
-								{
-									if(empty($combinations[1]) && $color == "Multicolor" )
-									{
-										$data['combinations'][$i]['combination']['color'] = "Multicolor";
-									}
-									else
-									{
-										if ($color == null) 
-										{
-											$data['combinations'][$i]['combination']['color'] = "Multicolor";
-										}
-										else
-										{
-											$data['combinations'][$i]['combination']['color'] = $color;
-										}
-									}
-								}
-
-								else
-								{						
-									$data['combinations'][$i]['combination']['color'] = $combinations[1];
-									$color = $combinations[1];	
-									unset($combinations[1]);						
-								}
-							}
-						*/
-
+						
 						//Size Logic PROTOYPE
 						if( is_numeric($combinations[0]) || 
 							preg_match("/[XS|X|S|L|M|XL|XXL|XXXL]+/",$combinations[0]) || 
