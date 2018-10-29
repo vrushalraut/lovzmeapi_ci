@@ -1,6 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+// Based on RESTful
 class Products extends CI_Model
 {
 	public function __construct()
