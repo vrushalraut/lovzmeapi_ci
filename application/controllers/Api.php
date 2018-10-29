@@ -24,6 +24,7 @@ class Api extends CI_Controller {
 		parent::__construct();
 		$this->load->model('products');
 		$this->load->model('errors');
+		$this->load->model('validation');
 
 		$api_key = $this->input->get('ws_key');
 
@@ -73,8 +74,60 @@ class Api extends CI_Controller {
 		}
 		else
 		{
-			$this->products->getLovzmeProductsPrice();
+			$this->products->getProducts();
 		}
+	}
+
+	public function login()
+	{
+		$api_key = $this->input->get('ws_key');
+
+		if( API_KEY == $api_key )
+		{
+			if($this->input->method(true) == 'POST')
+			{
+				$username = $_POST['username'];
+				$password = $_POST['password'];
+
+				$this->user_validation($username,$password);
+				// echo json_encode($data);
+			}
+			
+			elseif ($this->input->method(true) == 'GET') 
+			{
+				$data["error"] = array(	"Code"	=> 401,
+										"Category" => "UNAUTHORIZED",
+										"Message" => "You are unauthorized to access the requested resource.",
+								);
+				echo json_encode($data);
+			}
+
+			elseif ($this->input->method(true) == 'PUT') 
+			{
+				$data["error"] = array(	"Code"	=> 401,
+										"Category" => "UNAUTHORIZED",
+										"Message" => "You are unauthorized to access the requested resource.",
+								);
+				echo json_encode($data);
+			}
+
+			else
+			{
+				$data["error"] = array(	"Code"	=> 404,
+										"Category"	=> "NOT FOUND",
+										"Message" => "We could not find the resource you requested." );
+				echo json_encode($data);
+			}
+		}
+
+		else
+		{
+			$data["error"] = array(	"Code"	=> 404,
+									"Category"	=> "NOT FOUND",
+									"Message" => "We could not find the resource you requested." );
+			echo json_encode($data);
+		}
+
 	}
 
 	public function error($error_name)
@@ -88,7 +141,12 @@ class Api extends CI_Controller {
 		echo "Hello";
 		$aa = $this->uri->segment(3);
 		// echo $aa;
-		
+	}
+
+	public function user_validation($username,$password)
+	{
+		$this->validation->validuser($username,$password);
+		// echo json_encode($username);
 	}
 
 	public function test()
